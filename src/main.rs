@@ -1,6 +1,6 @@
-use std::env::var;
 use std::fs::read_dir;
 use std::path::PathBuf;
+use std::{env::var, io::Write};
 
 use anyhow::{Context, Result};
 use clap::Parser;
@@ -85,9 +85,22 @@ fn main() -> Result<()> {
     }
 
     // TODO: OPEN CONFIG FILE
-
+    let mut firefox_config_file = std::fs::File::open(firefox_config_path)
+        .with_context(|| format!("Unable to open Firefox configuration file"))?;
     // TODO: WRITE FILENAMES TO CONFIG FILE
+    // let i = 32;
+    // for name in &profile_names {
+    //     let mut _name = name.to_owned();
+    //     let _i = i.to_string().to_owned();
 
+    //     firefox_config_file.write_all(
+    //         "[Profile"
+    //             .to_string()
+    //             .into_bytes()
+    //             .("]\n".to_string().into_bytes())
+    //             + name.into_bytes(),
+    //     )?;
+    // }
     // TODO: COPY DIRECTORIES TO PROFILE DIRECTORY
     Ok(())
 }
