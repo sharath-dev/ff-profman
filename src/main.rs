@@ -30,11 +30,37 @@ fn get_firefox_profiles_path() -> Result<PathBuf> {
     return Ok(firefox_profiles_path);
 }
 
+fn get_profile_names(profile_directories: Vec<PathBuf>) -> Result<Vec<String>> {
+    let mut names: Vec<String> = Vec::<String>::new();
+    for profile_directory in profile_directories {
+        if profile_directory.is_dir() {
+            names.push(str::to_owned(
+                profile_directory
+                    .iter()
+                    .last()
+                    .with_context(|| {
+                        format!(
+                            "Could not read directory name {:?}",
+                            &profile_directory.display()
+                        )
+                    })?
+                    .to_str()
+                    .unwrap(),
+            ));
+        }
+    }
+    return Ok(names);
+}
+
 fn main() -> Result<()> {
     // Set path of Firefox profiles depending on OS
     let firefox_profiles_path: PathBuf =
         get_firefox_profiles_path().with_context(|| format!("Unable to find directory"))?;
     println!("{:?}", &firefox_profiles_path);
+
+    let firefox_config_path: PathBuf = firefox_profiles_path.join("profiles.ini");
+
+    println!("{:?}", &firefox_config_path);
 
     // Parse CLI arguments
     let args = Cli::parse();
@@ -51,17 +77,11 @@ fn main() -> Result<()> {
 
     // Iterates through the directories and returns the directory name alone
     println!("Directories: ");
-    for profile_directory in profiles_directories {
-        if profile_directory.is_dir() {
-            let profile_name_os_string = profile_directory.iter().last().with_context(|| {
-                format!(
-                    "Could not read directory name {:?}",
-                    &profile_directory.display()
-                )
-            })?;
-            let profile_name = profile_name_os_string.to_str().unwrap();
-            println!("{}", profile_name)
-        }
+    let profile_names: Vec<String> = get_profile_names(profiles_directories)
+        .with_context(|| format!("Could not read directory names"))?;
+
+    for name in profile_names {
+        println!("{}", name)
     }
 
     // TODO: OPEN CONFIG FILE
